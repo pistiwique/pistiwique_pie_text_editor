@@ -22,7 +22,7 @@ bl_info = {
     "name": "Pistiwique_pie_text_editor",
     "description": "",
     "author": "Pistiwique",
-    "version": (0, 0, 6),
+    "version": (0, 1, 0),
     "blender": (2, 74, 0),
     "location": "View3D",
     "wiki_url": "",
@@ -30,20 +30,9 @@ bl_info = {
     
     
 import bpy      
-from . utils import *
+from . pie_utils import initPieTextEditor, initPieTextPlus
+from . operators import *
 
-# load and reload submodules
-##################################    
-    
-from . import developer_utils
-modules = developer_utils.setup_addon_modules(__path__, __name__)
-
-
-
-# register
-################################## 
-
-import traceback
 
 addon_keymaps = []
 
@@ -73,15 +62,10 @@ def unregister_keymaps():
     
 
 def register():
-    try: bpy.utils.register_module(__name__)
-    except: traceback.print_exc()
+    bpy.utils.register_module(__name__)
     register_keymaps()
-    
-    print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
+
 
 def unregister():
-    try: bpy.utils.unregister_module(__name__)
-    except: traceback.print_exc()
+    bpy.utils.unregister_module(__name__)
     unregister_keymaps()
-    
-    print("Unregistered {}".format(bl_info["name"]))

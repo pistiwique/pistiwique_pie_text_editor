@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Menu
-from . utils import *
+from . pie_utils import *
 
 
 ###########################################################
@@ -32,8 +32,8 @@ class pieTextEditor(Menu):
         # 7-TOP-LEFT            
         pie.operator("text.custom_cut", text="Cut", icon='SCULPTMODE_HLT') 
         # 9-TOP-RIGHT
-        pie.menu(menu="text.text_list_menu", text="Choose module")                
-        # 1-BOTTOM-LEFT
+        pie.operator("text.init_choose_module", text="Choose module", icon='FILE_TEXT')                
+        # 1-BOTTOM-LEFT        
         if addon_name in [addon.module for addon in bpy.context.user_preferences.addons]:
             pie.operator("wm.call_menu", text="Template").name="text_editor.insert_template_menu"  
         else:
