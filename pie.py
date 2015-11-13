@@ -7,7 +7,7 @@ from . pie_utils import *
 # RIGHT CLIC
 ###########################################################
 
-class pieTextEditor(Menu):
+class PieTextEditor(Menu):
     bl_idname = "pie.text_editor"
     bl_label = "Text editor"
     
@@ -22,7 +22,7 @@ class pieTextEditor(Menu):
         else:
             pie.operator("text.custom_comment", text="Comment")       
         # 2-BOTTOM
-        pie.operator("text.paste", text="Paste", icon='FILE_TICK')                        
+        pie.operator("text.paste", text="Paste", icon='FILE_TICK')                  
         # 8-TOP
         addon_name = "code_autocomplete-master"
         if addon_name in [addon.module for addon in bpy.context.user_preferences.addons]:
@@ -39,7 +39,8 @@ class pieTextEditor(Menu):
         else:
             pie.prop(context.space_data, "show_word_wrap", text="Wrap")                                  
         # 3-BOTTOM-RIGHT 
-        row = pie.row(align=True) 
+        row = pie.row(align=True)
+        row.scale_y = 1.5 
         row.operator("text.init_jump_to_class",text="To class")
         row.operator("text.init_jump_to_fonction",text="To fonction") 
          
@@ -52,7 +53,7 @@ class pieTextEditor(Menu):
 # SHIFT + RIGHT CLIC
 ###########################################################
         
-class pieTextPlus(Menu):
+class PieTextPlus(Menu):
     bl_idname = "pie.text_plus"
     bl_label = "Text editor"
     
@@ -72,6 +73,8 @@ class pieTextPlus(Menu):
             pie.prop(context.space_data, "show_word_wrap", text="Wrap") 
             # 9-TOP-RIGHT
             pie.operator("text.jump", text="Jump to line", icon='ANIM_DATA')
+            # 1-BOTTOM-LEFT
+            pie.prop(context.window_manager, "custom_punctuation_enabled", text="Custom punctuation")
             
         else:
             # 4-LEFT
@@ -82,3 +85,12 @@ class pieTextPlus(Menu):
             pie.operator("screen.area_dupli", text="Dupli window", icon='RENDERLAYERS')
             # 8_TOP 
             pie.operator("text.save", text="Save file", icon='SAVE_COPY') 
+            # 7-TOP-LEFT
+            pie.prop(context.window_manager, "custom_punctuation_enabled", text="Custom punctuation")
+
+
+def TEXT_PT_custom_punctuation(self, context):
+    layout = self.layout
+    wm = context.window_manager
+    
+    layout.prop(wm, "custom_punctuation_enabled", text="Custom punctuation")

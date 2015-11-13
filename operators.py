@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Operator
 
 
-class customComment(Operator):
+class CustomComment(Operator):
     bl_idname = "text.custom_comment"
     bl_label = "Custom comment"
 
@@ -13,12 +13,13 @@ class customComment(Operator):
         txt_name = bpy.context.space_data.text.name
         txt = bpy.data.texts[txt_name]
         line_begin = txt.current_line_index
-
+        
+        #select_end_line_index missing - iterate over txt.lines
         for line_end, line_obj in enumerate(txt.lines):
             if line_obj == txt.select_end_line:
                 break
 
-        selection = [i for i in range(line_begin + 1, line_end + 2)]       
+        selection = [i for i in range(line_begin, line_end)]       
                
         if line_begin != line_end:
             bpy.ops.text.comment()
@@ -35,7 +36,7 @@ class customComment(Operator):
         return {'FINISHED'}
 
     
-class customUncomment(Operator):
+class CustomUncomment(Operator):
     ''' Uncomment and delete space after the # '''
     bl_idname = "text.custom_uncomment"
     bl_label = "Custom uncomment"
@@ -47,13 +48,12 @@ class customUncomment(Operator):
         start_selection = bpy.context.space_data.text.current_character
         end_selection = bpy.context.space_data.text.select_end_character
         base = context.space_data.text.current_line.body 
-
-        #select_end_line_index missing - iterate over txt.lines
+        
         for line_end, line_obj in enumerate(txt.lines):
             if line_obj == txt.select_end_line:
                 break
 
-        selection = [i for i in range(line_begin + 1, line_end + 2)]  
+        selection = [i for i in range(line_begin, line_end)]  
               
         if line_begin != line_end:
             bpy.ops.text.uncomment() 
@@ -67,15 +67,24 @@ class customUncomment(Operator):
         return {'FINISHED'}  
 
         
-class customCopy(Operator):
+class CustomCopy(Operator):
     bl_idname = "text.custom_copy"
     bl_label = "Custom copy"
     
     def execute(self, context):
+        select_loc = bpy.context.space_data.text.select_end_character
+        cursor_loc = bpy.context.space_data.text.current_character
+        txt_name = bpy.context.space_data.text.name
+        txt = bpy.data.texts[txt_name]
+        line_begin = txt.current_line_index
+
+        for line_end, line_obj in enumerate(txt.lines):
+            if line_obj == txt.select_end_line:
+                break
+
+        selection = [i for i in range(line_begin, line_end)] 
         
-        start_selection = bpy.context.space_data.text.current_character
-        end_selection = bpy.context.space_data.text.select_end_character                
-        if start_selection != end_selection:
+        if cursor_loc != select_loc or line_begin != line_end:
             bpy.ops.text.copy()
             
         else:
@@ -84,28 +93,37 @@ class customCopy(Operator):
                 bpy.ops.text.move(type='LINE_BEGIN')
                 bpy.ops.text.move(type='NEXT_WORD')
                 indent_value = bpy.context.space_data.text.select_end_character
-                count_charactere = end_selection - indent_value
+                count_charactere = select_loc - indent_value
                 for charactere in range(count_charactere):
                     bpy.ops.text.move_select(type='NEXT_CHARACTER')   
                              
             else:
                 bpy.ops.text.move(type='LINE_BEGIN')
-                for charactere in range(end_selection):
+                for charactere in range(select_loc):
                     bpy.ops.text.move_select(type='NEXT_CHARACTER')
             bpy.ops.text.copy()      
         
         return {'FINISHED'}
 
     
-class customCut(Operator):
+class CustomCut(Operator):
     bl_idname = "text.custom_cut"
     bl_label = "Custom cut"
     
     def execute(self, context):
+        select_loc = bpy.context.space_data.text.select_end_character
+        cursor_loc = bpy.context.space_data.text.current_character
+        txt_name = bpy.context.space_data.text.name
+        txt = bpy.data.texts[txt_name]
+        line_begin = txt.current_line_index
 
-        start_selection = bpy.context.space_data.text.current_character
-        end_selection = bpy.context.space_data.text.select_end_character                
-        if start_selection != end_selection:
+        for line_end, line_obj in enumerate(txt.lines):
+            if line_obj == txt.select_end_line:
+                break
+
+        selection = [i for i in range(line_begin, line_end)] 
+        
+        if cursor_loc != select_loc or line_begin != line_end:
             bpy.ops.text.cut()
             
         else:
@@ -115,164 +133,90 @@ class customCut(Operator):
                 bpy.ops.text.move(type='LINE_BEGIN')
                 bpy.ops.text.move(type='NEXT_WORD')
                 indent_value = bpy.context.space_data.text.select_end_character
-                count_charactere = end_selection - indent_value
+                count_charactere = select_loc - indent_value
                 for charactere in range(count_charactere):
                     bpy.ops.text.move_select(type='NEXT_CHARACTER')
                                
             else:
                 bpy.ops.text.move(type='LINE_BEGIN')
-                for charactere in range(end_selection):
+                for charactere in range(select_loc):
                     bpy.ops.text.move_select(type='NEXT_CHARACTER')
             bpy.ops.text.cut()
             
         return {'FINISHED'}
 
-    
-class customInvertedComma(Operator):
-    bl_idname = "text.custom_inverted_comma"
-    bl_label = "Custom Inverted Comma"
-    
-    def execute(self, context):
-        start_selection = bpy.context.space_data.text.current_character
-        end_selection = bpy.context.space_data.text.select_end_character
-        txt_name = bpy.context.space_data.text.name
-        txt = bpy.data.texts[txt_name]
-        line_begin = txt.current_line_index
 
-        for line_end, line_obj in enumerate(txt.lines):
-            if line_obj == txt.select_end_line:
-                break
+def run_custom_punctuation(self, context):
+    bpy.ops.text.custom_punctuation('INVOKE_DEFAULT')
+    
 
-        selection = [i for i in range(line_begin + 1, line_end + 2)]        
-               
-        if start_selection != end_selection or len(selection) > 1:
-            bpy.ops.text.cut()
-            bpy.ops.text.insert(text='""')
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
-            bpy.ops.text.paste()
-                
-        else:   
-            bpy.ops.text.insert(text='""')
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
+def custom_puncuation_function(punctuation):
+    select_loc = bpy.context.space_data.text.select_end_character
+    cursor_loc = bpy.context.space_data.text.current_character
+    txt_name = bpy.context.space_data.text.name
+    txt = bpy.data.texts[txt_name]
+    line_begin = txt.current_line_index
+
+    for line_end, line_obj in enumerate(txt.lines):
+        if line_obj == txt.select_end_line:
+            break
+
+    selection = [i for i in range(line_begin, line_end)] 
+    
+    if cursor_loc != select_loc or line_begin != line_end:
+        bpy.ops.text.cut()
+        bpy.ops.text.insert(text=punctuation)
+        bpy.ops.text.move(type='PREVIOUS_CHARACTER')
+        bpy.ops.text.paste()                                
+    else:   
+        bpy.ops.text.insert(text=punctuation)
+        bpy.ops.text.move(type='PREVIOUS_CHARACTER')
+    
         
-        return {'FINISHED'}
-
-
-class customApostrophe(Operator):
-    bl_idname = "text.custom_apostrophe"
-    bl_label = "Custom Apostrophe"
-   
-    def execute(self, context):
-        start_selection = bpy.context.space_data.text.current_character
-        end_selection = bpy.context.space_data.text.select_end_character
-        txt_name = bpy.context.space_data.text.name
-        txt = bpy.data.texts[txt_name]
-        line_begin = txt.current_line_index
-
-        for line_end, line_obj in enumerate(txt.lines):
-            if line_obj == txt.select_end_line:
-                break
-
-        selection = [i for i in range(line_begin + 1, line_end + 2)]        
-               
-        if start_selection != end_selection or len(selection) > 1:
-            bpy.ops.text.cut()
-            bpy.ops.text.insert(text="''")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
-            bpy.ops.text.paste()
-                
-        else:   
-            bpy.ops.text.insert(text="''")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
+class CustomPunctuation(Operator):
+    bl_idname = "text.custom_punctuation"
+    bl_label = "Custom punctuation"
+    
+    def modal(self, context, event):
+        wm = context.window_manager
+        if wm.custom_punctuation_enabled:
+            if context.space_data.type == 'TEXT_EDITOR':
+                if event.unicode in ['(', '"', "'", '[', '{'] and event.value == 'PRESS':
+                    select_loc = context.space_data.text.select_end_character
+                    cursor_loc = context.space_data.text.current_character
+                    line = context.space_data.text.current_line.body
+                    
+#                    if cursor_loc == select_loc and cursor_loc < len(line) and line[cursor_loc] not in "\n\t\r )]},.+-*/":
+#                        return {'PASS_THROUGH'}
+                    
+                    if event.unicode == '"':
+                        custom_puncuation_function('""')
+                            
+                    if event.unicode == "'":
+                        custom_puncuation_function("''")
+                            
+                    if event.unicode == '(':
+                        custom_puncuation_function("()")
+                            
+                    if event.unicode == "{":
+                        custom_puncuation_function("{}")
+                        
+                    if event.unicode == "[":
+                        custom_puncuation_function("[]")
+                        
+                    return {'RUNNING_MODAL'}
+            
+        else:
+            return {'FINISHED'}
         
-        return {'FINISHED'}
-
-
-class customBracket(Operator):
-    bl_idname = "text.custom_bracket"
-    bl_label = "Custom Bracket"
-    
-    def execute(self, context):
-        start_selection = bpy.context.space_data.text.current_character
-        end_selection = bpy.context.space_data.text.select_end_character
-        txt_name = bpy.context.space_data.text.name
-        txt = bpy.data.texts[txt_name]
-        line_begin = txt.current_line_index
-
-        for line_end, line_obj in enumerate(txt.lines):
-            if line_obj == txt.select_end_line:
-                break
-
-        selection = [i for i in range(line_begin + 1, line_end + 2)]        
-               
-        if start_selection != end_selection or len(selection) > 1:
-            bpy.ops.text.cut()
-            bpy.ops.text.insert(text="()")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
-            bpy.ops.text.paste()
-                
-        else:   
-            bpy.ops.text.insert(text="()")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
+        return {'PASS_THROUGH'}
         
-        return {'FINISHED'}        
-    
-
-class customBrace(Operator):
-    bl_idname = "text.custom_brace"
-    bl_label = "Custom Brace"
-    
-    def execute(self, context):
-        start_selection = bpy.context.space_data.text.current_character
-        end_selection = bpy.context.space_data.text.select_end_character
-        txt_name = bpy.context.space_data.text.name
-        txt = bpy.data.texts[txt_name]
-        line_begin = txt.current_line_index
-
-        for line_end, line_obj in enumerate(txt.lines):
-            if line_obj == txt.select_end_line:
-                break
-
-        selection = [i for i in range(line_begin + 1, line_end + 2)]        
-               
-        if start_selection != end_selection or len(selection) > 1:
-            bpy.ops.text.cut()
-            bpy.ops.text.insert(text="{}")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
-            bpy.ops.text.paste()
-                
-        else:   
-            bpy.ops.text.insert(text="{}")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
         
-        return {'FINISHED'}
-    
-    
-class customSquareBracket(Operator):
-    bl_idname = "text.custom_square_bracket"
-    bl_label = "Custom Square Bracket"
-    
-    def execute(self, context):
-        start_selection = bpy.context.space_data.text.current_character
-        end_selection = bpy.context.space_data.text.select_end_character
-        txt_name = bpy.context.space_data.text.name
-        txt = bpy.data.texts[txt_name]
-        line_begin = txt.current_line_index
+    def invoke(self, context, event):
 
-        for line_end, line_obj in enumerate(txt.lines):
-            if line_obj == txt.select_end_line:
-                break
-
-        selection = [i for i in range(line_begin + 1, line_end + 2)]        
-               
-        if start_selection != end_selection or len(selection) > 1:
-            bpy.ops.text.cut()
-            bpy.ops.text.insert(text="[]")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
-            bpy.ops.text.paste()
-                
-        else:   
-            bpy.ops.text.insert(text="[]")
-            bpy.ops.text.move(type='PREVIOUS_CHARACTER')
+        if context.area.type != 'TEXT_EDITOR':
+            self.report({'WARNING'}, "Text Editor not found, cannot run operator")
+            return {'CANCELLED'}
+        context.window_manager.modal_handler_add(self)
         
-        return {'FINISHED'}
+        return {'RUNNING_MODAL'}       

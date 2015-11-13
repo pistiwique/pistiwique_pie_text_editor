@@ -8,7 +8,7 @@ custom_class_list = []
 custom_fonction_list = []
 custom_module_list = []
 
-class initPieTextPlus(Operator):
+class InitPieTextPlus(Operator):
     bl_idname = "text.init_pie_text_plus"
     bl_label = "Pie text plus"
     
@@ -18,7 +18,7 @@ class initPieTextPlus(Operator):
         return {'FINISHED'}
     
     
-class initPieTextEditor(Operator): 
+class InitPieTextEditor(Operator): 
     bl_idname = "text.init_pie_text_editor"
     bl_label = "Pie text editor"
 

@@ -30,7 +30,7 @@ bl_info = {
     
     
 import bpy      
-from . pie_utils import initPieTextEditor, initPieTextPlus
+from . pie_utils import InitPieTextEditor, InitPieTextPlus
 from . operators import *
 
 
@@ -41,13 +41,8 @@ def register_keymaps():
     wm = bpy.context.window_manager
     
     km = wm.keyconfigs.addon.keymaps.new(name="Text Generic", space_type='TEXT_EDITOR')
-    kmi = km.keymap_items.new(initPieTextEditor.bl_idname, 'RIGHTMOUSE', 'PRESS')
-    kmi = km.keymap_items.new(initPieTextPlus.bl_idname, 'RIGHTMOUSE', 'PRESS', shift=True)
-    kmi = km.keymap_items.new("text.custom_inverted_comma", 'THREE', 'PRESS')
-    kmi = km.keymap_items.new("text.custom_apostrophe", 'FOUR', 'PRESS')
-    kmi = km.keymap_items.new("text.custom_bracket", 'FIVE', 'PRESS')
-    kmi = km.keymap_items.new("text.custom_brace", 'FOUR', 'PRESS', alt=True)
-    kmi = km.keymap_items.new("text.custom_square_bracket", 'FIVE', 'PRESS', alt=True)
+    kmi = km.keymap_items.new(InitPieTextEditor.bl_idname, 'RIGHTMOUSE', 'PRESS')
+    kmi = km.keymap_items.new(InitPieTextPlus.bl_idname, 'RIGHTMOUSE', 'PRESS', shift=True)
 
     addon_keymaps.append(km)
 
@@ -63,6 +58,11 @@ def unregister_keymaps():
 
 def register():
     bpy.utils.register_module(__name__)
+    bpy.types.WindowManager.custom_punctuation_enabled = bpy.props.BoolProperty(
+        name="Custom punctuation",
+        default=False,
+        description="Put automatically the punctuation by pair",
+        update=run_custom_punctuation)
     register_keymaps()
 
 
