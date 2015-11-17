@@ -43,6 +43,12 @@ def register_keymaps():
     km = wm.keyconfigs.addon.keymaps.new(name="Text Generic", space_type='TEXT_EDITOR')
     kmi = km.keymap_items.new(InitPieTextEditor.bl_idname, 'RIGHTMOUSE', 'PRESS')
     kmi = km.keymap_items.new(InitPieTextPlus.bl_idname, 'RIGHTMOUSE', 'PRESS', shift=True)
+    kmi = km.keymap_items.new(CustomDoubleQuote.bl_idname, 'THREE', 'PRESS')
+    kmi = km.keymap_items.new(CustomSimpleQuote.bl_idname, 'FOUR', 'PRESS')
+    kmi = km.keymap_items.new(CustomBracket.bl_idname, 'FIVE', 'PRESS')
+    kmi = km.keymap_items.new(CustomSquareBracket.bl_idname, 'FIVE', 'PRESS', alt=True)
+    kmi = km.keymap_items.new(CustomBrace.bl_idname, 'FOUR', 'PRESS', alt=True)
+    
 
     addon_keymaps.append(km)
 
@@ -58,11 +64,6 @@ def unregister_keymaps():
 
 def register():
     bpy.utils.register_module(__name__)
-    bpy.types.WindowManager.custom_punctuation_enabled = bpy.props.BoolProperty(
-        name="Custom punctuation",
-        default=False,
-        description="Put automatically the punctuation by pair",
-        update=run_custom_punctuation)
     register_keymaps()
 
 

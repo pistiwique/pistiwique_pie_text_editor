@@ -22,10 +22,10 @@ class InitPieTextEditor(Operator):
     bl_idname = "text.init_pie_text_editor"
     bl_label = "Pie text editor"
 
-    def execute(self, context):      
+    def execute(self, context):
         bpy.ops.wm.call_menu_pie(name='pie.text_editor')
         
-        return {'FINISHED'}                        
+        return {'FINISHED'}                      
 
 
 class InitChooseModule(Operator):
@@ -77,26 +77,26 @@ class ChooseModulePanel(bpy.types.Menu):
         layout = self.layout
         for item in custom_module_list:
             op = layout.operator("text.choose_module", text=item)
-            op.module = item               
+            op.module = item
             
                    
 class InitJumpToClass(Operator):
     bl_idname = "text.init_jump_to_class"
     bl_label = "Init jump to class"
     
-    def execute(self, context):  
-        del(custom_class_list[:])      
-        txt = bpy.context.space_data.text.name  
+    def execute(self, context):
+        del(custom_class_list[:])
+        txt = bpy.context.space_data.text.name
         text = bpy.data.texts[txt]
         current_line = bpy.context.space_data.text.current_line_index
-        for i in range(len(text.lines)):    
+        for i in range(len(text.lines)):
             bpy.context.space_data.text.current_line_index = i
             base = bpy.context.space_data.text.current_line.body
             if "class " == base[:6]:
                 custom_class_list.append((base.split("(")[0], bpy.context.space_data.text.current_line_index))
 
         bpy.context.space_data.text.current_line_index = current_line
-                    
+
         bpy.ops.wm.call_menu(name="text.jump_class_menu")
         
         return {'FINISHED'}
