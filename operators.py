@@ -1,25 +1,25 @@
 import bpy
 from bpy.types import Operator
 
+clipboard_list = [] 
 
 class CustomComment(Operator):
     bl_idname = "text.custom_comment"
     bl_label = "Custom comment"
 
     def execute(self, context):
-        
+
         start_selection = bpy.context.space_data.text.current_character
         end_selection = bpy.context.space_data.text.select_end_character
         txt_name = bpy.context.space_data.text.name
         txt = bpy.data.texts[txt_name]
         line_begin = txt.current_line_index
-        
-       # select_end_line_index missing - iterate over txt.lines
+
         for line_end, line_obj in enumerate(txt.lines):
             if line_obj == txt.select_end_line:
                 break
 
-        selection = [i for i in range(line_begin, line_end)]    
+        selection = [i for i in range(line_begin+1, line_end+2)]
                
         if line_begin != line_end:
             bpy.ops.text.comment()
@@ -29,7 +29,7 @@ class CustomComment(Operator):
             bpy.ops.text.cut()
             bpy.ops.text.insert(text="#")
             bpy.ops.text.paste()
-            bpy.ops.text.move(type='NEXT_CHARACTER')
+            bpy.ops.text.move(type='NEXT_CHARACTER')            
 
         else:
             bpy.ops.text.select_line()
@@ -40,7 +40,6 @@ class CustomComment(Operator):
 
 
 class CustomUncomment(Operator):
-    ''' Uncomment and delete space after the # '''
     bl_idname = "text.custom_uncomment"
     bl_label = "Custom uncomment"
 
@@ -56,7 +55,7 @@ class CustomUncomment(Operator):
             if line_obj == txt.select_end_line:
                 break
 
-        selection = [i for i in range(line_begin, line_end)]
+        selection = [i for i in range(line_begin+1, line_end+2)]
 
         if line_begin != line_end:
             bpy.ops.text.uncomment()
@@ -79,24 +78,58 @@ class CustomCopy(Operator):
         cursor_loc = bpy.context.space_data.text.current_character
         txt_name = bpy.context.space_data.text.name
         txt = bpy.data.texts[txt_name]
-        line_begin = txt.current_line_index
-
+        line_begin = txt.current_line_index          
+       
+        context.window_manager.clipboard = ""
+        
         for line_end, line_obj in enumerate(txt.lines):
             if line_obj == txt.select_end_line:
                 break
 
-        selection = [i for i in range(line_begin, line_end)]
+        if line_begin < line_end:
+            selection = [i for i in range(line_begin, line_end+1)] 
+        else:
+            selection = [i for i in range(line_end,line_begin+1)]
+        
+        del(clipboard_list[:])
+        
+        if line_begin != line_end:           
+            line_to_copy_tmp = []            
+            
+            for index in selection:
+                context.space_data.text.current_line_index = index
+                if context.space_data.text.current_line.body.startswith("    "):
+                    bpy.ops.text.move(type='LINE_BEGIN')
+                    bpy.ops.text.move(type='NEXT_WORD')
+                current_character = context.space_data.text.current_character
+                line = context.space_data.text.current_line.body[current_character:]
+                line_to_copy_tmp.append((int(current_character/4), line))
+            
+            for items in line_to_copy_tmp:
+                clipboard_list.append("\t"*(items[0]-min([i[0] for i in line_to_copy_tmp])) + items[1] + "\n")
+            
+            del(line_to_copy_tmp[:])
 
-        if cursor_loc != select_loc or line_begin != line_end:
+            bpy.ops.text.move(type='LINE_END')                
+                                 
+        elif cursor_loc != select_loc:            
             bpy.ops.text.copy()
-            bpy.ops.text.move(type='NEXT_CHARACTER')            
-
-        else:                        
+            bpy.ops.text.move(type='NEXT_CHARACTER')
+            
+        else:
             base = context.space_data.text.current_line.body
             end_copy = context.space_data.text.current_character
-            copy_text = base[:end_copy].split("    ")[-1]
-            bpy.context.window_manager.clipboard = copy_text                        
-            
+            if base.startswith("    "):
+                bpy.ops.text.move(type='LINE_BEGIN')
+                bpy.ops.text.move(type='NEXT_WORD')
+                current_character = context.space_data.text.current_character
+                bpy.context.window_manager.clipboard = base[current_character:end_copy]
+                for character in base[current_character:end_copy]:
+                    bpy.ops.text.move(type='NEXT_CHARACTER')
+                
+            else:
+                bpy.context.window_manager.clipboard = base[:end_copy]
+         
         return {'FINISHED'}
 
     
@@ -109,35 +142,64 @@ class CustomCut(Operator):
         cursor_loc = bpy.context.space_data.text.current_character
         txt_name = bpy.context.space_data.text.name
         txt = bpy.data.texts[txt_name]
-        line_begin = txt.current_line_index
-
+        line_begin = txt.current_line_index          
+    
+        context.window_manager.clipboard = ""
+        
         for line_end, line_obj in enumerate(txt.lines):
             if line_obj == txt.select_end_line:
                 break
 
-        selection = [i for i in range(line_begin, line_end)] 
+        if line_begin < line_end:
+            selection = [i for i in range(line_begin, line_end+1)] 
+        else:
+            selection = [i for i in range(line_end,line_begin+1)]
         
-        if cursor_loc != select_loc or line_begin != line_end:
+        del(clipboard_list[:])
+        
+        if line_begin != line_end:           
+            line_to_cut_tmp = []            
+            
+            for index in selection:
+                context.space_data.text.current_line_index = index
+                if context.space_data.text.current_line.body.startswith("    "):
+                    bpy.ops.text.move(type='LINE_BEGIN')
+                    bpy.ops.text.move(type='NEXT_WORD')                
+                current_character = context.space_data.text.current_character
+                line = context.space_data.text.current_line.body[current_character:]
+                line_to_cut_tmp.append((int(current_character/4), line))
+                bpy.ops.text.select_line()
+                bpy.ops.text.delete()
+            
+            for items in line_to_cut_tmp:
+                clipboard_list.append("\t"*(items[0]-min([i[0] for i in line_to_cut_tmp])) + items[1] + "\n")
+            
+            del(line_to_cut_tmp[:])                
+                                
+        elif cursor_loc != select_loc:            
             bpy.ops.text.cut()
             
         else:
             base = context.space_data.text.current_line.body
-            bpy.ops.text.select_line()                        
-            if "    " in base:
+            end_copy = context.space_data.text.current_character
+            if base.startswith("    "):
                 bpy.ops.text.move(type='LINE_BEGIN')
                 bpy.ops.text.move(type='NEXT_WORD')
-                indent_value = bpy.context.space_data.text.select_end_character
-                count_charactere = select_loc - indent_value
-                for charactere in range(count_charactere):
+                current_character = context.space_data.text.current_character
+                bpy.context.window_manager.clipboard = base[current_character:end_copy]
+                for character in base[current_character:end_copy]:
                     bpy.ops.text.move_select(type='NEXT_CHARACTER')
-                               
+                bpy.ops.text.delete()
+                                                 
             else:
+                bpy.context.window_manager.clipboard = base[:end_copy]
                 bpy.ops.text.move(type='LINE_BEGIN')
-                for charactere in range(select_loc):
+                for character in base[:end_copy]:
                     bpy.ops.text.move_select(type='NEXT_CHARACTER')
-            bpy.ops.text.cut()
-            
+                bpy.ops.text.delete()                   
+        
         return {'FINISHED'}
+
     
 
 def custom_punctuation_function(punctuation):
@@ -220,6 +282,27 @@ class CustomBrace(Operator):
     
     def execute(self, context):
         custom_punctuation_function("{}")
-        
+    
         return {'FINISHED'}
+
+
+class CustomPaste(Operator):
+    bl_idname = "text.custom_paste"
+    bl_label = "Paste"
+    
+    def execute(self, context):
+        if context.window_manager.clipboard:
+            bpy.ops.text.paste()
+            
+            return {'FINISHED'}
         
+        else:
+            base_indent = int(context.space_data.text.current_character/4)
+
+            bpy.ops.text.insert(text=clipboard_list[0])
+            
+            for line in clipboard_list[1:-1]:
+                bpy.ops.text.insert(text="    "*base_indent + line)
+            bpy.ops.text.insert(text="    "*base_indent + (clipboard_list[-1])[:-1])
+
+            return {'FINISHED'}

@@ -30,9 +30,21 @@ bl_info = {
     
     
 import bpy      
-from . pie_utils import InitPieTextEditor, InitPieTextPlus
+from . pie_utils import InitPieTextEditor, InitPieTextPlus, InitCommentUncomment
 from . operators import *
 
+# load and reload submodules
+##################################    
+    
+from . import developer_utils
+modules = developer_utils.setup_addon_modules(__path__, __name__)
+
+
+
+# register
+################################## 
+
+import traceback
 
 addon_keymaps = []
 
@@ -43,12 +55,15 @@ def register_keymaps():
     km = wm.keyconfigs.addon.keymaps.new(name="Text Generic", space_type='TEXT_EDITOR')
     kmi = km.keymap_items.new(InitPieTextEditor.bl_idname, 'RIGHTMOUSE', 'PRESS')
     kmi = km.keymap_items.new(InitPieTextPlus.bl_idname, 'RIGHTMOUSE', 'PRESS', shift=True)
+    kmi = km.keymap_items.new(CustomCopy.bl_idname, 'C', 'PRESS', ctrl=True)
+    kmi = km.keymap_items.new(CustomCut.bl_idname, 'X', 'PRESS', ctrl=True)
+    kmi = km.keymap_items.new(CustomPaste.bl_idname, 'V', 'PRESS', ctrl=True)
+    kmi = km.keymap_items.new(InitCommentUncomment.bl_idname, 'THREE', 'PRESS', alt=True)
     kmi = km.keymap_items.new(CustomDoubleQuote.bl_idname, 'THREE', 'PRESS')
     kmi = km.keymap_items.new(CustomSimpleQuote.bl_idname, 'FOUR', 'PRESS')
     kmi = km.keymap_items.new(CustomBracket.bl_idname, 'FIVE', 'PRESS')
     kmi = km.keymap_items.new(CustomSquareBracket.bl_idname, 'FIVE', 'PRESS', alt=True)
-    kmi = km.keymap_items.new(CustomBrace.bl_idname, 'FOUR', 'PRESS', alt=True)
-    
+    kmi = km.keymap_items.new(CustomBrace.bl_idname, 'FOUR', 'PRESS', alt=True)     
 
     addon_keymaps.append(km)
 
@@ -61,12 +76,16 @@ def unregister_keymaps():
         wm.keyconfigs.addon.keymaps.remove(km)
     addon_keymaps.clear()
     
-
+    
 def register():
-    bpy.utils.register_module(__name__)
+    try: bpy.utils.register_module(__name__)
+    except: traceback.print_exc()
     register_keymaps()
-
+    print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
 
 def unregister():
-    bpy.utils.unregister_module(__name__)
     unregister_keymaps()
+    try: bpy.utils.unregister_module(__name__)
+    except: traceback.print_exc()
+    
+    print("Unregistered {}".format(bl_info["name"]))

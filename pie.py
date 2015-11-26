@@ -18,11 +18,11 @@ class PieTextEditor(Menu):
         pie.operator("text.custom_copy", text="Copy", icon='GREASEPENCIL')
         # 6-RIGHT
         if "#" in bpy.context.space_data.text.current_line.body:
-            pie.operator("text.custom_uncomment", text="Uncomment")
+            pie.operator("text.init_comment_uncomment", text="Uncomment")        
         else:
-            pie.operator("text.custom_comment", text="Comment")
+            pie.operator("text.init_comment_uncomment", text="Comment")
         # 2-BOTTOM
-        pie.operator("text.paste", text="Paste", icon='FILE_TICK')
+        pie.operator("text.custom_paste", text="Paste", icon='FILE_TICK')
         # 8-TOP
         addon_name = "code_autocomplete-master"
         if addon_name in [addon.module for addon in bpy.context.user_preferences.addons]:

@@ -25,7 +25,7 @@ class InitPieTextEditor(Operator):
     def execute(self, context):
         bpy.ops.wm.call_menu_pie(name='pie.text_editor')
         
-        return {'FINISHED'}                      
+        return {'FINISHED'}
 
 
 class InitChooseModule(Operator):
@@ -172,3 +172,15 @@ class JumpFonctionMenu(bpy.types.Menu):
         for item in custom_fonction_list:
             op = layout.operator("text.jump_to_fonction", text=item[0])
             op.fonction_index = str(item[1])
+
+class InitCommentUncomment(bpy.types.Operator):
+    bl_idname = "text.init_comment_uncomment"
+    bl_label = "Comment Uncomment"
+ 
+    def execute(self, context):
+        if "#" in context.space_data.text.current_line.body:
+            bpy.ops.text.custom_uncomment()
+        else:
+            bpy.ops.text.custom_comment()
+        
+        return {"FINISHED"}      
