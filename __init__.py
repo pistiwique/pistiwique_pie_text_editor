@@ -81,6 +81,7 @@ def register():
     try: bpy.utils.register_module(__name__)
     except: traceback.print_exc()
     register_keymaps()
+    bpy.types.WindowManager.multi_line_enabled = bpy.props.BoolProperty(default=False)
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
 
 def unregister():
