@@ -1,84 +1,46 @@
+'''
+Copyright (C) 2017 Legigan Jeremy AKA Pistiwique
+
+Created by Legigan Jeremy AKA Pistiwique
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import bpy
 from bpy.types import Menu
-from . pie_utils import *
 
 
-###########################################################
-# RIGHT CLIC
-###########################################################
-
-class PieTextEditor(Menu):
-    bl_idname = "pie.text_editor"
-    bl_label = "Text editor"
+class PTET_MT_pie_text_editor(Menu):
+    bl_idname = "ide_like_tools.custom_text_editor"
+    bl_label = "Text Editor"
 
     def draw(self, context):
         pie = self.layout.menu_pie()
 
-        # 4-LEFT
-        pie.operator("text.custom_copy", text="Copy", icon='GREASEPENCIL')
-        # 6-RIGHT
-        if "#" in bpy.context.space_data.text.current_line.body:
-            pie.operator("text.init_comment_uncomment", text="Uncomment")        
+        if context.space_data.text:
+            # 4-left
+            pie.operator('ide_like_tools.api_search', text="API search")
+            # 6-right
+            if "#" in context.space_data.text.current_line.body:
+                pie.operator('ide_like_tools.toggle_comment', text="Uncomment")
+
+            else:
+                pie.operator('ide_like_tools.toggle_comment', text="Comment")
+
+            pie.operator('text.debug')
+
+            pie.operator('ide_like_tools.restart_blender')
+
         else:
-            pie.operator("text.init_comment_uncomment", text="Comment")
-        # 2-BOTTOM
-        pie.operator("text.custom_paste", text="Paste", icon='FILE_TICK')
-        # 8-TOP
-        addon_name = "code_autocomplete-master"
-        if addon_name in [addon.module for addon in bpy.context.user_preferences.addons]:
-            pie.operator("code_autocomplete.run_addon", text="Run addon", icon='PLAY')
-        else:
-            pie.operator("text.run_script", text="Run script", icon='PLAY')
-        # 7-TOP-LEFT
-        pie.operator("text.custom_cut", text="Cut", icon='SCULPTMODE_HLT')
-        # 9-TOP-RIGHT
-        pie.operator("text.init_choose_module", text="Choose module", icon='FILE_TEXT')
-        # 1-BOTTOM-LEFT
-        if addon_name in [addon.module for addon in bpy.context.user_preferences.addons]:
-            pie.operator("wm.call_menu", text="Template").name="text_editor.insert_template_menu"
-        else:
-            pie.prop(context.space_data, "show_word_wrap", text="Wrap")
-        # 3-BOTTOM-RIGHT
-        row = pie.row(align=True)
-        row.scale_y = 1.5
-        row.operator("text.init_jump_to_class",text="To class")
-        row.operator("text.init_jump_to_fonction",text="To fonction")
-
-
-
-
-
-###########################################################
-# SHIFT + RIGHT CLIC
-###########################################################
-
-class PieTextPlus(Menu):
-    bl_idname = "pie.text_plus"
-    bl_label = "Text editor"
-
-    def draw(self, context):
-        pie = self.layout.menu_pie()
-        addon_name = "code_autocomplete-master"
-        if addon_name in [addon.module for addon in bpy.context.user_preferences.addons]:
-            # 4-LEFT
-            pie.operator("text.properties", text="Properties", icon='OUTLINER_OB_SURFACE')
-            # 6-RIGHT    
-            pie.operator("wm.console_toggle", text="Console", icon='CONSOLE')                                 
-            # 2-BOTTOM
-            pie.operator("screen.area_dupli", text="Dupli window", icon='RENDERLAYERS')
-            # 8_TOP 
-            pie.operator("code_autocomplete.save_files", text="Save all files", icon='SAVE_COPY')               
-            # 7-TOP-LEFT
-            pie.prop(context.space_data, "show_word_wrap", text="Wrap") 
-            # 9-TOP-RIGHT
-            pie.operator("text.jump", text="Jump to line", icon='ANIM_DATA')
-            
-        else:
-            # 4-LEFT
-            pie.operator("text.properties", text="Properties", icon='OUTLINER_OB_SURFACE')
-            # 6-RIGHT    
-            pie.operator("wm.console_toggle", text="Console", icon='CONSOLE')                                 
-            # 2-BOTTOM
-            pie.operator("screen.area_dupli", text="Dupli window", icon='RENDERLAYERS')
-            # 8_TOP 
-            pie.operator("text.save", text="Save file", icon='SAVE_COPY') 
+            pie.operator('text.new', text='New', icon='ZOOMIN')
