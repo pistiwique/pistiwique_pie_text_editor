@@ -18,7 +18,7 @@ Created by Legigan Jeremy AKA Pistiwique
 '''
 
 bl_info = {
-    "name": "IDE like tools",
+    "name": "Pistiwique Pie Text Editor",
     "description": "",
     "author": "Legigan Jeremy AKA Pistiwique",
     "version": (0, 0, 1),
